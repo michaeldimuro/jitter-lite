@@ -1,6 +1,7 @@
 name: build
 
 # Builds distributable Jitter binaries for macOS, Windows, and Linux.
+# On a v* tag push it also publishes them as GitHub Release assets.
 # Trigger manually (Actions tab -> Run workflow) or by pushing a v* tag.
 on:
   push:
@@ -17,13 +18,10 @@ jobs:
         include:
           - name: macos-arm64
             os: macos-latest
-            artifact: jitter
           - name: windows-x64
             os: windows-latest
-            artifact: jitter.exe
           - name: linux-x64
             os: ubuntu-latest
-            artifact: jitter
     steps:
       - uses: actions/checkout@v4
 
@@ -43,17 +41,59 @@ jobs:
       - name: Build release
         run: cargo build --release
 
-      - name: Package macOS .app
+      # Package each platform into a single archive under release/.
+      - name: Package (macOS)
         if: matrix.os == 'macos-latest'
         run: |
           chmod +x packaging/macos/bundle.sh
           ./packaging/macos/bundle.sh
+          mkdir -p staging release
+          cp -R dist/Jitter.app staging/
+          cp target/release/jitter staging/jitter
+          cp README.md staging/
+          ditto -c -k --keepParent staging release/jitter-${{ matrix.name }}.zip
 
-      - name: Upload binary
+      - name: Package (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mkdir -p staging release
+          cp target/release/jitter staging/jitter
+          cp README.md staging/
+          tar -C staging -czf release/jitter-${{ matrix.name }}.tar.gz .
+
+      - name: Package (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path staging, release | Out-Null
+          Copy-Item target/release/jitter.exe staging/
+          Copy-Item README.md staging/
+          Compress-Archive -Path staging/* -DestinationPath release/jitter-${{ matrix.name }}.zip
+
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: jitter-${{ matrix.name }}
-          path: |
-            target/release/${{ matrix.artifact }}
-            dist/Jitter.app
+          path: release/*
           if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    # Only publish a Release for tag builds, not manual runs.
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true

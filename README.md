@@ -23,14 +23,15 @@ Because each nudge resets idle to ~0, your idle time never climbs past the thres
 
 ## Download & install
 
-Prebuilt binaries are produced by CI for macOS, Windows, and Linux.
+Prebuilt binaries are published for macOS, Windows, and Linux on every tagged release.
 
-1. Go to the **[Actions tab](https://github.com/michaeldimuro/jitter-lite/actions)** (or the [Releases page](https://github.com/michaeldimuro/jitter-lite/releases) if a release is published).
-2. Open the most recent successful **build** run.
-3. Download the artifact for your platform from the **Artifacts** section:
-   - `jitter-macos-arm64` — contains the `jitter` binary and `Jitter.app`
-   - `jitter-windows-x64` — contains `jitter.exe`
-   - `jitter-linux-x64` — contains the `jitter` binary
+1. Go to the **[Releases page](https://github.com/michaeldimuro/jitter-lite/releases)** and open the latest release.
+2. Download the archive for your platform from **Assets**:
+   - `jitter-macos-arm64.zip` — contains `Jitter.app`, the `jitter` CLI binary, and this README
+   - `jitter-windows-x64.zip` — contains `jitter.exe` and this README
+   - `jitter-linux-x64.tar.gz` — contains the `jitter` binary and this README
+
+> Building from an untagged commit? The same binaries are also available as run artifacts under the [Actions tab](https://github.com/michaeldimuro/jitter-lite/actions) — open the latest **build** run and grab the artifact for your platform.
 
 ### macOS
 
