@@ -10,6 +10,11 @@
 // Linux build deps: sudo apt install libgtk-3-dev libxdo-dev libappindicator3-dev
 // (or the libayatana-appindicator3-dev equivalent).
 
+// On Windows, build as a GUI-subsystem app in release so no console window opens
+// (a console owns the process, so closing it would kill the tray app). Debug
+// builds keep the console so stdout/stderr stay visible during development.
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use std::{
     fs,
     path::PathBuf,

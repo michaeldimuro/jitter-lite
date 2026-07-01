@@ -986,7 +986,7 @@ dependencies = [
 
 [[package]]
 name = "jitter"
-version = "0.4.0"
+version = "0.4.3"
 dependencies = [
  "auto-launch",
  "chrono",
